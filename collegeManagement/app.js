@@ -14,6 +14,6 @@ app.listen(PORT, (err, res) => {
   if (err) {
     console.log("Unable to start the server");
   } else {
-    console.log(`Server is up and running at port ${PORT}`);
+    console.log(`Server is up and running at port ${PORT} in development`);
   }
 });
