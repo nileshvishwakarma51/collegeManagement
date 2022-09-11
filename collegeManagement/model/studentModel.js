@@ -11,6 +11,7 @@ const studentSchema = mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    unique: true
   },
   studentPassword: {
     type: String,
@@ -28,10 +29,11 @@ const studentSchema = mongoose.Schema({
 const student = mongoose.model("student", studentSchema);
 
 const createStudent = async (studentObj) => {
-  console.log("create student :", studentObj);
+ 
   try {
     console.log(studentObj);
     const createdstudent = await student.create(studentObj);
+    console.log("created student :", createdstudent);
     return createdstudent;
   } catch (err) {
     console.log(err);
@@ -45,6 +47,7 @@ let getStudent = async (studentObj) => {
     const getStudent = await student
       .find(studentObj, { _id: false, __v: false })
       .populate("studentCollegeId");
+      console.log("mil gya student :", getStudent);
     return getStudent;
   } catch (err) {
     console.log(err);

@@ -4,9 +4,11 @@ const mongoose = require("mongoose");
 const { PORT, dbUrl } = require("./config/config");
 const studentRouter = require("./routes/student.routes");
 const collegeRouter = require("./routes/college.routes");
+const auth= require("./middleware/auth");
 mongoose.connect(dbUrl);
 
 app.use(express.json());
+app.use(auth.authenticate)
 app.use("/college", collegeRouter);
 app.use("/student", studentRouter);
 

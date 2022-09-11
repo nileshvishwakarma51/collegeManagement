@@ -1,5 +1,8 @@
 const studentModelMethod = require("../model/studentModel");
 const collegeModelMethod = require("../model/collegeModel");
+const bcryptjs = require("bcryptjs");
+const jwt= require("jsonwebtoken");
+const { JWTSECRET } = require("../config/config");
 
 let createStudent = async (req, res) => {
   try {
@@ -30,11 +33,16 @@ let createStudent = async (req, res) => {
     );
 
     studentObj.studentCollegeId = findCollegeId[0]._id;
+    const encryptedPassword = await bcryptjs.hash(
+      studentObj.studentPassword,
+      8
+    );
 
-    console.log("student ka object", studentObj);
+    studentObj.studentPassword = encryptedPassword;
 
     let createdStudent = await studentModelMethod.createStudent(studentObj);
-    res.send(`student Created Sucessfully:\n ${createdStudent}`);
+    const token= await jwt.sign(JSON.stringify(createdStudent),JWTSECRET)
+    res.send(`student Created Sucessfully:\n ${createdStudent} \n Token : ${token}`);
   } catch (err) {
     res.send(`Unable to Create student :\n ${err}`);
   }
@@ -53,4 +61,27 @@ let getStudent = async (req, res) => {
   }
 };
 
-module.exports = { createStudent, getStudent };
+const loginStudent = async (req, res) => {
+  let loginObj = {};
+  if (req.body.email && req.body.password) {
+    loginObj.studentEmail = req.body.email;
+  } else {
+    return res.send(`Please enter your email and password`);
+  }
+  try {
+    let getStudent = await studentModelMethod.getStudent(loginObj);
+    let passIsMatch = await bcryptjs.compare(
+      req.body.password,
+      getStudent[0].studentPassword
+    );
+    if (passIsMatch) {
+      const token= await jwt.sign(JSON.stringify(getStudent[0]),JWTSECRET)
+      return res.send(`Login success Welcome!  : ${getStudent[0].studentName} \n your token : ${token}`);
+    }
+    res.send(`Invalid credentials`);
+  } catch (err) {
+    res.send(`Unable to get Students :\n ${err}`);
+  }
+};
+
+module.exports = { createStudent, getStudent, loginStudent };
